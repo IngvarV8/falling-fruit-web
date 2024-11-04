@@ -10,6 +10,7 @@ import {
   getLocationById,
 } from '../utils/api'
 import { fetchReviewData } from './reviewSlice'
+import { updateLastMapView } from './viewportSlice'
 
 export const fetchLocationData = createAsyncThunk(
   'location/fetchLocationData',
@@ -185,6 +186,11 @@ const locationSlice = createSlice({
     },
   },
   extraReducers: {
+    [updateLastMapView]: (state, action) => {
+      if (state.locationId === 'new') {
+        state.position = action.payload.center
+      }
+    },
     [fetchLocationData.pending]: (state, action) => {
       state.location = null
       state.locationId = parseInt(action.meta.arg.locationId)
@@ -239,7 +245,7 @@ const locationSlice = createSlice({
          * New location added
          */
         state.location = action.payload
-        state.reviews = []
+        state.reviews = action.payload.reviews || []
         state.locationId = parseInt(action.payload.id)
       }
       state.isLoading = false

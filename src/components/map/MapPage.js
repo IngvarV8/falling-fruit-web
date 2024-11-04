@@ -12,7 +12,7 @@ import {
 import { fetchFilterCounts } from '../../redux/filterSlice'
 import { updatePosition } from '../../redux/locationSlice'
 import { setGoogle } from '../../redux/mapSlice'
-import { fetchLocations, viewChangeAndFetch } from '../../redux/viewChange'
+import { fetchLocations } from '../../redux/viewChange'
 import { updateLastMapView } from '../../redux/viewportSlice'
 import { bootstrapURLKeys } from '../../utils/bootstrapURLKeys'
 import throttle from '../../utils/throttle'
@@ -117,9 +117,12 @@ const makeHandleViewChange = (dispatch, googleMap, history) => (_) => {
     center: { lat: center.lat(), lng: center.lng() },
     zoom: googleMap.getZoom(),
     bounds: googleMap.getBounds().toJSON(),
+    width: googleMap.getDiv().offsetWidth,
+    height: googleMap.getDiv().offsetHeight,
   }
-  dispatch(viewChangeAndFetch(newView))
   dispatch(updateLastMapView(newView))
+  dispatch(fetchLocations())
+  dispatch(fetchFilterCounts())
   history.changeView(newView)
 }
 
@@ -149,7 +152,6 @@ const MapPage = ({ isDesktop }) => {
   const history = useAppHistory()
   const dispatch = useDispatch()
   const handleViewChangeRef = useRef(() => void 0)
-  const typesAccess = useSelector((state) => state.type.typesAccess)
 
   const [draggedPosition, setDraggedPosition] = useState(null)
 
@@ -222,6 +224,8 @@ const MapPage = ({ isDesktop }) => {
       center: { lat: center.lat(), lng: center.lng() },
       zoom: map.getZoom(),
       bounds: map.getBounds().toJSON(),
+      width: map.getDiv().offsetWidth,
+      height: map.getDiv().offsetHeight,
     }
     dispatch(updateLastMapView(initialView))
     dispatch(fetchLocations())
@@ -287,7 +291,14 @@ const MapPage = ({ isDesktop }) => {
       style={
         isDesktop
           ? { width: '100%', height: '100%', position: 'relative' }
-          : { width: '100%', position: 'fixed', bottom: '50px', top: '63px' }
+          : {
+              width: '100%',
+              position: 'absolute',
+              top: '48px',
+              bottom: '50px',
+              left: 0,
+              right: 0,
+            }
       }
     >
       {(mapIsLoading || locationIsLoading) && <BottomLeftLoadingIndicator />}
@@ -419,10 +430,7 @@ const MapPage = ({ isDesktop }) => {
               selected={location.id === locationId}
               editing={isEditingLocation && location.id === locationId}
               showLabel={showLabels}
-              commonName={typesAccess.getCommonName(location.type_ids[0])}
-              scientificName={typesAccess.getScientificName(
-                location.type_ids[0],
-              )}
+              typeIds={location.type_ids}
             />
           ))}
           {(isEditingLocation || isAddingLocation) && draggedPosition && (

@@ -109,6 +109,7 @@ const Search = (props) => {
   })
 
   const { googleMap } = useSelector((state) => state.map)
+  const { lastMapView } = useSelector((state) => state.viewport)
 
   const coordinatesResultOrNull = getCoordinatesResult(value)
   const suggestionsList = coordinatesResultOrNull
@@ -153,13 +154,14 @@ const Search = (props) => {
       const longitude = Number(description.split(',')[1])
       dispatch(
         selectPlace({
-          place: getZoomedInView(latitude, longitude),
+          place: getZoomedInView(latitude, longitude, lastMapView),
         }),
       )
     } else {
       const placeBounds = await getPlaceBounds(
         description,
         descriptionToPlaceId.current[description],
+        lastMapView,
       )
       dispatch(selectPlace({ place: placeBounds }))
     }
@@ -213,33 +215,35 @@ const Search = (props) => {
           />
         )}
       </SearchBarContainer>
-      <StyledComboboxPopover portal={false}>
-        <ComboboxList>
-          {suggestionsList.map((suggestion) => {
-            const {
-              place_id,
-              description,
-              structured_formatting: { main_text, secondary_text },
-            } = suggestion
+      {suggestionsList.length > 0 && (
+        <StyledComboboxPopover portal={false}>
+          <ComboboxList>
+            {suggestionsList.map((suggestion) => {
+              const {
+                place_id,
+                description,
+                structured_formatting: { main_text, secondary_text },
+              } = suggestion
 
-            // Allow handleSelect to access the place id (see useRef above)
-            descriptionToPlaceId.current[description] = place_id
+              // Allow handleSelect to access the place id (see useRef above)
+              descriptionToPlaceId.current[description] = place_id
 
-            return (
-              <ComboboxOption
-                as={SearchEntry}
-                key={place_id}
-                value={description}
-                isCurrentLocation={
-                  description === selectedPlace?.location.description
-                }
-              >
-                {[main_text, secondary_text]}
-              </ComboboxOption>
-            )
-          })}
-        </ComboboxList>
-      </StyledComboboxPopover>
+              return (
+                <ComboboxOption
+                  as={SearchEntry}
+                  key={place_id}
+                  value={description}
+                  isCurrentLocation={
+                    description === selectedPlace?.location.description
+                  }
+                >
+                  {[main_text, secondary_text]}
+                </ComboboxOption>
+              )
+            })}
+          </ComboboxList>
+        </StyledComboboxPopover>
+      )}
     </Combobox>
   )
 }

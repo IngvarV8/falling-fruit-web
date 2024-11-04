@@ -7,7 +7,7 @@ import { Link, NavLink, useLocation, useRouteMatch } from 'react-router-dom'
 import styled from 'styled-components/macro'
 
 import { logout } from '../../redux/authSlice'
-import { pathWithCurrentView } from '../../utils/appUrl'
+import { pathWithCurrentView, withFromPage } from '../../utils/appUrl'
 import aboutRoutes from '../about/aboutRoutes'
 import Button from '../ui/Button'
 import ResetButton from '../ui/ResetButton'
@@ -277,8 +277,11 @@ const Header = () => {
             ) : (
               <>
                 <li>
-                  <NavLink to="/users/sign_in" activeClassName="active">
-                    {t('users.sign_in')}
+                  <NavLink
+                    to={withFromPage('/users/sign_in')}
+                    activeClassName="active"
+                  >
+                    <Button secondary>{t('users.sign_in')}</Button>
                   </NavLink>
                 </li>
                 <li>
