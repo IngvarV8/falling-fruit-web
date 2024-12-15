@@ -40,7 +40,7 @@ const UserProfile = () => {
   }, [id])
 
   if (isLoading) {
-    return <LoadingOverlay />
+    return <LoadingOverlay data-testid="loading-overlay"/>
   }
 
   const { created_at, name, bio } = userData
@@ -59,7 +59,7 @@ const UserProfile = () => {
             {t('back')}
           </BackButton>
         </StyledNavBack>
-        <h3>User: {name}</h3>
+        <h3 data-testid={"user-name"}>User: {name}</h3>
         {bio && (
           <IconBesideText>
             <User size={20} />
