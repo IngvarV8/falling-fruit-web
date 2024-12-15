@@ -1,5 +1,5 @@
 import { ArrowBack, Calendar, User } from '@styled-icons/boxicons-regular'
-import { useEffect, useState } from 'react'
+import { Profiler, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components/macro'
@@ -40,44 +40,63 @@ const UserProfile = () => {
   }, [id])
 
   if (isLoading) {
-    return <LoadingOverlay data-testid="loading-overlay"/>
+    return <LoadingOverlay data-testid="loading-overlay" />
   }
 
   const { created_at, name, bio } = userData
 
   return (
-    <PageScrollWrapper>
-      <PageTemplate>
-        <StyledNavBack>
-          <BackButton
-            onClick={(event) => {
-              event.stopPropagation()
-              history.goBack()
-            }}
-          >
-            <ArrowBack />
-            {t('back')}
-          </BackButton>
-        </StyledNavBack>
-        <h3 data-testid={"user-name"}>User: {name}</h3>
-        {bio && (
+    <Profiler
+      id="UserProfile"
+      onRender={(
+        id,
+        phase,
+        actualDuration,
+        baseDuration,
+        startTime,
+        commitTime,
+      ) => {
+        console.log(`Profiler for ${id}`)
+        console.log(`Phase: ${phase}`)
+        console.log(`Actual render duration: ${actualDuration}ms`)
+        console.log(`Base render duration: ${baseDuration}ms`)
+        console.log(`Start time: ${startTime}`)
+        console.log(`Commit time: ${commitTime}`)
+      }}
+    >
+      <PageScrollWrapper>
+        <PageTemplate>
+          <StyledNavBack>
+            <BackButton
+              onClick={(event) => {
+                event.stopPropagation()
+                history.goBack()
+              }}
+            >
+              <ArrowBack />
+              {t('back')}
+            </BackButton>
+          </StyledNavBack>
+          <h3 data-testid={'user-name'}>User: {name}</h3>
+          {bio && (
+            <IconBesideText>
+              <User size={20} />
+              <p>
+                <i>{bio}</i>
+              </p>
+            </IconBesideText>
+          )}
           <IconBesideText>
-            <User size={20} />
+            <Calendar color={theme.secondaryText} size={20} />
             <p>
-              <i>{bio}</i>
+              <time dateTime={created_at}>
+                {`Joined on ${formatISOString(created_at, i18n.language)}`}
+              </time>
             </p>
           </IconBesideText>
-        )}
-        <IconBesideText>
-          <Calendar color={theme.secondaryText} size={20} />
-          <p>
-            <time dateTime={created_at}>
-              {`Joined on ${formatISOString(created_at, i18n.language)}`}
-            </time>
-          </p>
-        </IconBesideText>
-      </PageTemplate>
-    </PageScrollWrapper>
+        </PageTemplate>
+      </PageScrollWrapper>
+    </Profiler>
   )
 }
 
